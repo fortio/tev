@@ -1,6 +1,6 @@
 module fortio.org/tev
 
-go 1.24.5
+go 1.23.8
 
 require (
 	fortio.org/cli v1.10.0
