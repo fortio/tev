@@ -18,6 +18,7 @@ func Main() int {
 	noMouseFlag := flag.Bool("no-mouse", false, "Disable mouse tracking events (default is to enable it)")
 	mousePixelsFlag := flag.Bool("mouse-pixels", false, "Enable mouse pixel events (default is to disable it)")
 	mouseX10Flag := flag.Bool("mouse-x10", false, "Enable mouse X10 events (default is to disable it)")
+	noPasteModeFlag := flag.Bool("no-paste-mode", false, "Disable bracketed paste mode (default is to enable it)")
 	cli.Main()
 	ap := ansipixels.NewAnsiPixels(0) // fps 0 means raw os.Stdin
 	err := ap.Open()
@@ -30,6 +31,7 @@ func Main() int {
 		ap.MouseX10Off()
 		ap.MouseTrackingOff()
 		ap.MouseClickOff()
+		ap.SetBracketedPasteMode(false)
 		ap.Restore()
 	}()
 	crlfWriter := &terminal.CRLFWriter{Out: os.Stdout}
@@ -53,6 +55,12 @@ func Main() int {
 		ap.MouseX10On()
 		log.Infof("Mouse X10 events enabled")
 	}
+	if !*noPasteModeFlag {
+		ap.SetBracketedPasteMode(true)
+		log.Infof("Bracketed paste mode enabled")
+	} else {
+		log.Infof("Bracketed paste mode disabled")
+	}
 	ap.Out.Flush()
 	exitCount := 3
 	log.Infof("Fortio terminal event dump started. ^C 3 times to exit (or pkill tev)")
@@ -61,7 +69,7 @@ func Main() int {
 		if err != nil {
 			return log.FErrf("Error reading terminal: %v", err)
 		}
-		if len(ap.Data) == 0 {
+		if len(ap.Data) == 0 { // not really possible.
 			log.Infof("No input...")
 			continue
 		}
