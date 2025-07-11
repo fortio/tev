@@ -19,23 +19,29 @@ func Main() int {
 	mousePixelsFlag := flag.Bool("mouse-pixels", false, "Enable mouse pixel events (default is to disable it)")
 	mouseX10Flag := flag.Bool("mouse-x10", false, "Enable mouse X10 events (default is to disable it)")
 	noPasteModeFlag := flag.Bool("no-paste-mode", false, "Disable bracketed paste mode (default is to enable it)")
+	fpsFlag := flag.Float64("fps", 0, "Ansi pixels debug/complex mode - fps arg (default is 0, meaning simplest code in ansipixels: blocking mode reads)")
+	noRawFlag := flag.Bool("no-raw", false, "Stay in cooked mode, don't do raw mode (default is to enable it)")
 	cli.Main()
-	ap := ansipixels.NewAnsiPixels(0) // fps 0 means raw os.Stdin
-	err := ap.Open()
-	if err != nil {
-		return log.FErrf("Failed to open terminal: %v", err)
+	ap := ansipixels.NewAnsiPixels(*fpsFlag) // use the specified fps - if 0, it will be blocking mode.
+	if !*noRawFlag {
+		err := ap.Open()
+		if err != nil {
+			return log.FErrf("Failed to open terminal: %v", err)
+		}
+		defer func() {
+			ap.MoveCursor(0, ap.H-1)
+			ap.MousePixelsOff()
+			ap.MouseX10Off()
+			ap.MouseTrackingOff()
+			ap.MouseClickOff()
+			ap.SetBracketedPasteMode(false)
+			ap.Restore()
+		}()
+		crlfWriter := &terminal.CRLFWriter{Out: os.Stdout}
+		terminal.LoggerSetup(crlfWriter)
+	} else {
+		log.LogVf("Not enabling raw mode, staying in cooked mode")
 	}
-	defer func() {
-		ap.MoveCursor(0, ap.H-1)
-		ap.MousePixelsOff()
-		ap.MouseX10Off()
-		ap.MouseTrackingOff()
-		ap.MouseClickOff()
-		ap.SetBracketedPasteMode(false)
-		ap.Restore()
-	}()
-	crlfWriter := &terminal.CRLFWriter{Out: os.Stdout}
-	terminal.LoggerSetup(crlfWriter)
 	ap.OnResize = func() error {
 		log.Infof("Terminal resized to %dx%d", ap.W, ap.H)
 		return nil

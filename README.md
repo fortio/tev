@@ -26,3 +26,5 @@ brew install fortio/tap/tev
 ```
 tev help
 ```
+
+By defaults it will put the terminal in raw mode, turn on mouse tracking and show exactly what the terminal emulator is sending and in how many batches (of up to 1024 which is the internal ansipixels buffer size). Various flag allow to change what the terminal does (raw, mouse, bracketed paste, etc..)

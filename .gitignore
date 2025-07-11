@@ -26,3 +26,4 @@ go.work
 go.work.sum
 .goreleaser.yaml
 tev
+.gr
