@@ -1,6 +1,6 @@
 [![Go Report Card](https://goreportcard.com/badge/fortio.org/tev)](https://goreportcard.com/report/fortio.org/tev)
-[![GoDoc](https://godoc.org/fortio.org/tev?status.svg)](https://pkg.go.dev/fortio.org/tev)
-[![CI Checks](https://github.com/fortio/tev/actions/workflows/gochecks.yml/badge.svg)](https://github.com/fortio/tev/actions/workflows/gochecks.yml)
+<!-- [![GoDoc](https://godoc.org/fortio.org/tev?status.svg)](https://pkg.go.dev/fortio.org/tev) -->
+[![CI Checks](https://github.com/fortio/tev/actions/workflows/include.yml/badge.svg)](https://github.com/fortio/tev/actions/workflows/include.yml)
 # tev
 
 `tev` is a simple terminal/TUI event dump/decoder - similar to good old `xev` for X11. It helps debug raw terminal input.
