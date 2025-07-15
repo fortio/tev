@@ -1,5 +1,5 @@
-[![Go Report Card](https://goreportcard.com/badge/fortio.org/tev)](https://goreportcard.com/report/fortio.org/tev)
 <!-- [![GoDoc](https://godoc.org/fortio.org/tev?status.svg)](https://pkg.go.dev/fortio.org/tev) -->
+[![Go Report Card](https://goreportcard.com/badge/fortio.org/tev)](https://goreportcard.com/report/fortio.org/tev)
 [![CI Checks](https://github.com/fortio/tev/actions/workflows/include.yml/badge.svg)](https://github.com/fortio/tev/actions/workflows/include.yml)
 # tev
 
