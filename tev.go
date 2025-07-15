@@ -15,13 +15,14 @@ func main() {
 }
 
 func Main() int {
-	noMouseFlag := flag.Bool("no-mouse", false, "Disable mouse tracking events (default is to enable it)")
-	mousePixelsFlag := flag.Bool("mouse-pixels", false, "Enable mouse pixel events (default is to disable it)")
-	mouseX10Flag := flag.Bool("mouse-x10", false, "Enable mouse X10 events (default is to disable it)")
-	noPasteModeFlag := flag.Bool("no-paste-mode", false, "Disable bracketed paste mode (default is to enable it)")
+	noMouseFlag := flag.Bool("no-mouse", false, "Disable mouse tracking events (enabled by default)")
+	mousePixelsFlag := flag.Bool("mouse-pixels", false, "Enable mouse pixel events (vs grid)")
+	mouseX10Flag := flag.Bool("mouse-x10", false, "Enable mouse X10 events mode")
+	noPasteModeFlag := flag.Bool("no-paste-mode", false, "Disable bracketed paste mode")
 	fpsFlag := flag.Float64("fps", 0,
 		"Ansi pixels debug/complex mode - fps arg (default is 0, meaning simplest code in ansipixels: blocking mode reads)")
-	noRawFlag := flag.Bool("no-raw", false, "Stay in cooked mode, don't do raw mode (default is to enable it)")
+	noRawFlag := flag.Bool("no-raw", false, "Stay in cooked mode, instead of defaulting to raw mode")
+	echoFlag := flag.Bool("echo", false, "Echo input to stdout instead of logging escaped bytes, also turns off mouse tracking")
 	cli.Main()
 	ap := ansipixels.NewAnsiPixels(*fpsFlag) // use the specified fps - if 0, it will be blocking mode.
 	if !*noRawFlag {
@@ -48,7 +49,12 @@ func Main() int {
 		return nil
 	}
 	ap.NoDecode = true // we handle mouse events ourselves
-	if !*noMouseFlag {
+	echoMode := *echoFlag
+	logLevel := log.Info
+	if echoMode {
+		logLevel = log.Verbose
+	}
+	if !echoMode && !*noMouseFlag {
 		ap.MouseTrackingOn()
 		log.Infof("Mouse tracking enabled")
 	} else {
@@ -70,30 +76,40 @@ func Main() int {
 	}
 	ap.Out.Flush()
 	exitCount := 3
-	log.Infof("Fortio terminal event dump started. ^C 3 times to exit (or pkill tev)")
+	log.Infof("Fortio terminal event dump started. ^C 3 times to exit (or pkill tev). Ctrl-L clears the screen.")
 	for {
 		err := ap.ReadOrResizeOrSignal()
 		if err != nil {
 			return log.FErrf("Error reading terminal: %v", err)
 		}
 		if len(ap.Data) == 0 { // not really possible.
-			log.Infof("No input...")
+			log.Warnf("No input (unexpected)...")
 			continue
 		}
-		log.Infof("Read %d bytes: %q", len(ap.Data), ap.Data)
-		ap.MouseDecode()
-		if ap.Mouse {
-			log.Infof("Mouse event detected: buttons %06b, x %d, y %d", ap.Mbuttons, ap.Mx, ap.My)
-			continue
+		log.Logf(logLevel, "Read %d bytes: %q", len(ap.Data), ap.Data)
+		if echoMode {
+			os.Stdout.Write(ap.Data)
+		} else {
+			ap.MouseDecode()
+			if ap.Mouse {
+				log.Infof("Mouse event detected: buttons %06b, x %d, y %d", ap.Mbuttons, ap.Mx, ap.My)
+				continue
+			}
 		}
-		if ap.Data[0] == 3 { // Ctrl-C
+		switch ap.Data[0] {
+		case 3: // Ctrl-C
 			exitCount--
 			if exitCount == 0 {
 				log.Infof("3rd Ctrl-C received, exiting now.")
 				return 0
 			}
 			log.Infof("Ctrl-C received, %d more to exit..", exitCount)
-		} else {
+		case '\f': // Ctrl-L
+			log.Infof("Ctrl-L received, clearing screen.")
+			ap.ClearScreen()
+			ap.Out.Flush()
+			fallthrough // also reset ^C count.
+		default:
 			exitCount = 3 // reset count on any other input
 		}
 	}
