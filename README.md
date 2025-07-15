@@ -26,8 +26,25 @@ brew install fortio/tap/tev
 
 ## Run
 
-```
+```sh
 tev help
+```
+
+```sh
+  -echo
+        Echo input to stdout instead of logging escaped bytes, also turns off mouse tracking
+  -mouse-pixels
+        Enable mouse pixel events (vs grid)
+  -mouse-x10
+        Enable mouse X10 events mode
+  -no-mouse
+        Disable mouse tracking events (enabled by default)
+  -no-paste-mode
+        Disable bracketed paste mode
+  -no-raw
+        Stay in cooked mode, instead of defaulting to raw mode
+  -quiet
+        Quiet mode, sets loglevel to Error (quietly) to reduces the output
 ```
 
 By default it will put the terminal in raw mode, turn on mouse tracking and show exactly what the terminal emulator is sending and in how many batches (of up to 1024 which is the internal ansipixels buffer size). Various flag allow to change what the terminal does (raw, mouse, bracketed paste, etc..)
