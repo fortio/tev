@@ -19,7 +19,8 @@ func Main() int {
 	mousePixelsFlag := flag.Bool("mouse-pixels", false, "Enable mouse pixel events (default is to disable it)")
 	mouseX10Flag := flag.Bool("mouse-x10", false, "Enable mouse X10 events (default is to disable it)")
 	noPasteModeFlag := flag.Bool("no-paste-mode", false, "Disable bracketed paste mode (default is to enable it)")
-	fpsFlag := flag.Float64("fps", 0, "Ansi pixels debug/complex mode - fps arg (default is 0, meaning simplest code in ansipixels: blocking mode reads)")
+	fpsFlag := flag.Float64("fps", 0,
+		"Ansi pixels debug/complex mode - fps arg (default is 0, meaning simplest code in ansipixels: blocking mode reads)")
 	noRawFlag := flag.Bool("no-raw", false, "Stay in cooked mode, don't do raw mode (default is to enable it)")
 	cli.Main()
 	ap := ansipixels.NewAnsiPixels(*fpsFlag) // use the specified fps - if 0, it will be blocking mode.
