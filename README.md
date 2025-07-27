@@ -51,18 +51,19 @@ By default it will put the terminal in raw mode, turn on mouse tracking and show
 Example output
 ```sh
 $ tev -no-mouse
-13:28:27.673 [INF] Mouse tracking disabled
-13:28:27.673 [INF] Bracketed paste mode enabled
-13:28:27.673 [INF] Fortio terminal event dump started. ^C 3 times to exit (or pkill tev). Ctrl-L clears the screen.
-13:28:35.068 [INF] Read 1 bytes: "a"
-13:28:35.201 [INF] Read 1 bytes: "b"
-13:28:35.372 [INF] Read 1 bytes: "c"
-13:28:38.776 [INF] Read 6 bytes: "\x1b[200~"
-13:28:38.776 [INF] Read 26 bytes: "line 1\nline 2\nline 3\x1b[201~"
-13:28:42.056 [INF] Read 1 bytes: "\x03"
-13:28:42.056 [INF] Ctrl-C received, 2 more to exit..
-13:28:43.249 [INF] Read 1 bytes: "\x03"
-13:28:43.249 [INF] Ctrl-C received, 1 more to exit..
-13:28:43.850 [INF] Read 1 bytes: "\x03"
-13:28:43.850 [INF] 3rd Ctrl-C received, exiting now.
+20:40:23.063 [INF] Mouse tracking disabled
+20:40:23.064 [INF] Bracketed paste mode enabled
+20:40:23.064 [INF] Fortio terminal event dump started. ^C 3 times to exit (or pkill tev). Ctrl-L clears the screen.
+20:40:23.064 [INF] Tabs: [8 16 24 32 40 48 56 64 72 80 88 96]
+20:40:25.239 [INF] Read 1 bytes: "a"
+20:40:26.228 [INF] Read 1 bytes: "b"
+20:40:26.502 [INF] Read 1 bytes: "c"
+20:41:06.309 [INF] Read 6 bytes: "\x1b[200~"
+20:41:06.309 [INF] Read 26 bytes: "line 1\nline 2\nline 3\x1b[201~"
+20:41:09.359 [INF] Read 1 bytes: "\x03"
+20:41:09.359 [INF] Ctrl-C received, 2 more to exit..
+20:41:09.899 [INF] Read 1 bytes: "\x03"
+20:41:09.899 [INF] Ctrl-C received, 1 more to exit..
+20:41:10.428 [INF] Read 1 bytes: "\x03"
+20:41:10.428 [INF] 3rd Ctrl-C received, exiting now.```
 ```
