@@ -14,6 +14,27 @@ func main() {
 	os.Exit(Main())
 }
 
+// Taken/copied from fortio/gvi:
+func UpdateTabs(ap *ansipixels.AnsiPixels) []int {
+	ap.WriteString("\r\t")
+	var tabs []int
+	prevX := 0
+	for {
+		x, _, err := ap.ReadCursorPosXY()
+		if err != nil {
+			log.Errf("Error reading cursor position: %v", err)
+			return nil
+		}
+		if x == prevX || x == ap.W-1 {
+			break
+		}
+		tabs = append(tabs, x)
+		ap.WriteString("\t")
+		prevX = x
+	}
+	return tabs
+}
+
 func Main() int {
 	noMouseFlag := flag.Bool("no-mouse", false, "Disable mouse tracking events (enabled by default)")
 	mousePixelsFlag := flag.Bool("mouse-pixels", false, "Enable mouse pixel events (vs grid)")
@@ -30,20 +51,22 @@ func Main() int {
 		if err != nil {
 			return log.FErrf("Failed to open terminal: %v", err)
 		}
-		defer func() {
-			ap.MoveCursor(0, ap.H-1)
-			ap.MousePixelsOff()
-			ap.MouseX10Off()
-			ap.MouseTrackingOff()
-			ap.MouseClickOff()
-			ap.SetBracketedPasteMode(false)
-			ap.Restore()
-		}()
 		crlfWriter := &terminal.CRLFWriter{Out: os.Stdout}
 		terminal.LoggerSetup(crlfWriter)
 	} else {
 		log.LogVf("Not enabling raw mode, staying in cooked mode")
+		ap.GetSize()
 	}
+	defer func() {
+		// do it even in cooked mode to turn off mouse spam etc...
+		ap.MoveCursor(0, ap.H-1)
+		ap.MousePixelsOff()
+		ap.MouseX10Off()
+		ap.MouseTrackingOff()
+		ap.MouseClickOff()
+		ap.SetBracketedPasteMode(false)
+		ap.Restore()
+	}()
 	ap.OnResize = func() error {
 		log.Infof("Terminal resized to %dx%d", ap.W, ap.H)
 		return nil
@@ -77,6 +100,11 @@ func Main() int {
 	ap.Out.Flush()
 	exitCount := 3
 	log.Infof("Fortio terminal event dump started. ^C 3 times to exit (or pkill tev). Ctrl-L clears the screen.")
+	if !*noRawFlag {
+		log.Infof("Tabs: %v", UpdateTabs(ap))
+	} else {
+		log.Infof("Sample tabs:\n\t0\t1\t2\t3\t4\t5\t6\t7\t8")
+	}
 	for {
 		err := ap.ReadOrResizeOrSignal()
 		if err != nil {
