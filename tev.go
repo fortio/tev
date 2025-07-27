@@ -14,8 +14,9 @@ func main() {
 	os.Exit(Main())
 }
 
-// Taken/copied from fortio/gvi:
-func UpdateTabs(ap *ansipixels.AnsiPixels) []int {
+// GetTabStops measures the current tab stop positions.
+// Taken/copied from fortio/gvi.
+func GetTabStops(ap *ansipixels.AnsiPixels) []int {
 	ap.WriteString("\r\t")
 	var tabs []int
 	prevX := 0
@@ -55,7 +56,7 @@ func Main() int {
 		terminal.LoggerSetup(crlfWriter)
 	} else {
 		log.LogVf("Not enabling raw mode, staying in cooked mode")
-		ap.GetSize()
+		_ = ap.GetSize() // to set ah.H for restore.
 	}
 	defer func() {
 		// do it even in cooked mode to turn off mouse spam etc...
@@ -101,7 +102,7 @@ func Main() int {
 	exitCount := 3
 	log.Infof("Fortio terminal event dump started. ^C 3 times to exit (or pkill tev). Ctrl-L clears the screen.")
 	if !*noRawFlag {
-		log.Infof("Tabs: %v", UpdateTabs(ap))
+		log.Infof("Tabs: %v", GetTabStops(ap))
 	} else {
 		log.Infof("Sample tabs:\n\t0\t1\t2\t3\t4\t5\t6\t7\t8")
 	}
