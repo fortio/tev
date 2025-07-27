@@ -66,7 +66,7 @@ func Main() int {
 		terminal.LoggerSetup(crlfWriter)
 	} else {
 		log.LogVf("Not enabling raw mode, staying in cooked mode")
-		_ = ap.GetSize() // to set ah.H for restore.
+		_ = ap.GetSize() // to set ap.H for restore.
 	}
 	// do it even in cooked mode to turn off mouse spam etc...
 	defer Restore(ap)
