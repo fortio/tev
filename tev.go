@@ -137,7 +137,7 @@ func DebugLoop(ap *ansipixels.AnsiPixels, echoMode bool) int {
 			dec := ap.MouseDecode(false)
 			switch dec {
 			case ansipixels.MousePrefix:
-				log.Infof("Partial/split mouse event, reading more...")
+				log.LogVf("Partial/split mouse event, reading more...")
 				leftOver = append(leftOver, ap.Data...)
 				continue // wait for more data
 			case ansipixels.MouseComplete:
