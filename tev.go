@@ -50,6 +50,7 @@ func Main() int {
 	noMouseFlag := flag.Bool("no-mouse", false, "Disable mouse tracking events (enabled by default)")
 	mousePixelsFlag := flag.Bool("mouse-pixels", false, "Enable mouse pixel events (vs grid)")
 	mouseX10Flag := flag.Bool("mouse-x10", false, "Enable mouse X10 events mode")
+	mouseClickFlag := flag.Bool("mouse-clicks", false, "Enable mouse click events (instead of movement)")
 	noPasteModeFlag := flag.Bool("no-paste-mode", false, "Disable bracketed paste mode")
 	fpsFlag := flag.Float64("fps", 0,
 		"Ansi pixels debug/complex mode - fps arg (default is 0, meaning simplest code in ansipixels: blocking mode reads)")
@@ -76,6 +77,11 @@ func Main() int {
 	}
 	ap.NoDecode = true // we handle mouse events ourselves
 	echoMode := *echoFlag
+	if *mouseClickFlag {
+		ap.MouseClickOn()
+		log.Infof("Mouse click events enabled")
+		*noMouseFlag = true // mouse click implies no mouse tracking
+	}
 	if !echoMode && !*noMouseFlag {
 		ap.MouseTrackingOn()
 		log.Infof("Mouse tracking enabled")
@@ -124,12 +130,16 @@ func DebugLoop(ap *ansipixels.AnsiPixels, echoMode bool) int {
 		log.Logf(logLevel, "Read %d bytes: %q", len(ap.Data), ap.Data)
 		if echoMode {
 			os.Stdout.Write(ap.Data)
-		} else {
-			ap.MouseDecode()
-			if ap.Mouse {
-				log.Infof("Mouse event detected: buttons %06b, x %d, y %d", ap.Mbuttons, ap.Mx, ap.My)
+		} else if ap.MouseDecode() {
+			i := 1
+			for cont := true; cont; i++ {
+				log.Infof("Mouse event %d detected: buttons %06b, x %d, y %d", i, ap.Mbuttons, ap.Mx, ap.My)
+				cont = ap.MouseDecode() // continue until no more mouse events
+			}
+			if len(ap.Data) == 0 {
 				continue
 			}
+			log.LogVf("Still data available after decoding %d events: %q", i, len(ap.Data))
 		}
 		switch ap.Data[0] {
 		case 3: // Ctrl-C
