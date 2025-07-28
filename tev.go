@@ -118,28 +118,36 @@ func DebugLoop(ap *ansipixels.AnsiPixels, echoMode bool) int {
 		logLevel = log.Verbose
 	}
 	exitCount := 3
+	var leftOver []byte
 	for {
 		err := ap.ReadOrResizeOrSignal()
 		if err != nil {
 			return log.FErrf("Error reading terminal: %v", err)
 		}
-		if len(ap.Data) == 0 { // not really possible.
+		ap.Data = append(leftOver, ap.Data...) // prepend any left over from previous read
+		leftOver = leftOver[:0]                // reset left over
+		if len(ap.Data) == 0 {                 // not really possible.
 			log.Warnf("No input (unexpected)...")
 			continue
 		}
 		log.Logf(logLevel, "Read %d bytes: %q", len(ap.Data), ap.Data)
 		if echoMode {
 			os.Stdout.Write(ap.Data)
-		} else if ap.MouseDecode() {
-			i := 1
-			for cont := true; cont; i++ {
-				log.Infof("Mouse event %d detected: buttons %06b, x %d, y %d", i, ap.Mbuttons, ap.Mx, ap.My)
-				cont = ap.MouseDecode() // continue until no more mouse events
+		} else {
+			dec := ap.MouseDecode(false)
+			switch dec {
+			case ansipixels.MousePrefix:
+				log.Infof("Partial/split mouse event, reading more...")
+				leftOver = append(leftOver, ap.Data...)
+				continue // wait for more data
+			case ansipixels.MouseComplete:
+				log.Infof("Mouse event detected: buttons %06b, x %d, y %d", ap.Mbuttons, ap.Mx, ap.My)
+			case ansipixels.NoMouse, ansipixels.MouseError:
+				// fallthrough (error already logged and no mouse is normal case)
 			}
 			if len(ap.Data) == 0 {
 				continue
 			}
-			log.LogVf("Still data available after decoding %d events: %d", i-1, len(ap.Data))
 		}
 		switch ap.Data[0] {
 		case 3: // Ctrl-C
