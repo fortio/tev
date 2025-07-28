@@ -139,7 +139,7 @@ func DebugLoop(ap *ansipixels.AnsiPixels, echoMode bool) int {
 			if len(ap.Data) == 0 {
 				continue
 			}
-			log.LogVf("Still data available after decoding %d events: %q", i-1, len(ap.Data))
+			log.LogVf("Still data available after decoding %d events: %d", i-1, len(ap.Data))
 		}
 		switch ap.Data[0] {
 		case 3: // Ctrl-C
