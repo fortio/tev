@@ -124,9 +124,7 @@ func DebugLoop(ap *ansipixels.AnsiPixels, echoMode bool) int {
 		if err != nil {
 			return log.FErrf("Error reading terminal: %v", err)
 		}
-		ap.Data = append(leftOver, ap.Data...) // prepend any left over from previous read
-		leftOver = leftOver[:0]                // reset left over
-		if len(ap.Data) == 0 {                 // not really possible.
+		if len(ap.Data) == 0 { // not really possible.
 			log.Warnf("No input (unexpected)...")
 			continue
 		}
@@ -134,6 +132,8 @@ func DebugLoop(ap *ansipixels.AnsiPixels, echoMode bool) int {
 		if echoMode {
 			os.Stdout.Write(ap.Data)
 		} else {
+			ap.Data = append(leftOver, ap.Data...) // prepend any left over from previous read
+			leftOver = leftOver[:0]                // reset left over
 			dec := ap.MouseDecode(false)
 			switch dec {
 			case ansipixels.MousePrefix:
