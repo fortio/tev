@@ -50,6 +50,7 @@ func Main() int {
 	noMouseFlag := flag.Bool("no-mouse", false, "Disable mouse tracking events (enabled by default)")
 	mousePixelsFlag := flag.Bool("mouse-pixels", false, "Enable mouse pixel events (vs grid)")
 	mouseX10Flag := flag.Bool("mouse-x10", false, "Enable mouse X10 events mode")
+	mouseClickFlag := flag.Bool("mouse-clicks", false, "Enable mouse click events (instead of movement)")
 	noPasteModeFlag := flag.Bool("no-paste-mode", false, "Disable bracketed paste mode")
 	fpsFlag := flag.Float64("fps", 0,
 		"Ansi pixels debug/complex mode - fps arg (default is 0, meaning simplest code in ansipixels: blocking mode reads)")
@@ -76,6 +77,11 @@ func Main() int {
 	}
 	ap.NoDecode = true // we handle mouse events ourselves
 	echoMode := *echoFlag
+	if *mouseClickFlag {
+		ap.MouseClickOn()
+		log.Infof("Mouse click events enabled")
+		*noMouseFlag = true // mouse click implies no mouse tracking
+	}
 	if !echoMode && !*noMouseFlag {
 		ap.MouseTrackingOn()
 		log.Infof("Mouse tracking enabled")
@@ -112,6 +118,7 @@ func DebugLoop(ap *ansipixels.AnsiPixels, echoMode bool) int {
 		logLevel = log.Verbose
 	}
 	exitCount := 3
+	var leftOver []byte
 	for {
 		err := ap.ReadOrResizeOrSignal()
 		if err != nil {
@@ -125,9 +132,20 @@ func DebugLoop(ap *ansipixels.AnsiPixels, echoMode bool) int {
 		if echoMode {
 			os.Stdout.Write(ap.Data)
 		} else {
-			ap.MouseDecode()
-			if ap.Mouse {
+			ap.Data = append(leftOver, ap.Data...) // prepend any left over from previous read
+			leftOver = leftOver[:0]                // reset left over
+			dec := ap.MouseDecode(false)
+			switch dec {
+			case ansipixels.MousePrefix:
+				log.LogVf("Partial/split mouse event, reading more...")
+				leftOver = append(leftOver, ap.Data...)
+				continue // wait for more data
+			case ansipixels.MouseComplete:
 				log.Infof("Mouse event detected: buttons %06b, x %d, y %d", ap.Mbuttons, ap.Mx, ap.My)
+			case ansipixels.NoMouse, ansipixels.MouseError:
+				// fallthrough (error already logged and no mouse is normal case)
+			}
+			if len(ap.Data) == 0 {
 				continue
 			}
 		}
