@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"os"
+	"strconv"
 
 	"fortio.org/cli"
 	"fortio.org/log"
@@ -56,6 +57,7 @@ func Main() int {
 		"Ansi pixels debug/complex mode - fps arg (default is 0, meaning simplest code in ansipixels: blocking mode reads)")
 	noRawFlag := flag.Bool("no-raw", false, "Stay in cooked mode, instead of defaulting to raw mode")
 	echoFlag := flag.Bool("echo", false, "Echo input to stdout instead of logging escaped bytes, also turns off mouse tracking")
+	codeFlag := flag.String("code", "", "Additional code to send (will be unquoted, eg \"\\033[...\" will send CSI code)")
 	cli.Main()
 	ap := ansipixels.NewAnsiPixels(*fpsFlag) // use the specified fps - if 0, it will be blocking mode.
 	if !*noRawFlag {
@@ -101,6 +103,15 @@ func Main() int {
 		log.Infof("Bracketed paste mode enabled")
 	} else {
 		log.Infof("Bracketed paste mode disabled")
+	}
+	if *codeFlag != "" {
+		inp := "\"" + *codeFlag + "\""
+		dec, err := strconv.Unquote(inp)
+		if err != nil {
+			return log.FErrf("Invalid quoted string %s: %v", inp, err)
+		}
+		log.Infof("Sending code flag %q", dec)
+		ap.WriteString(dec)
 	}
 	ap.Out.Flush()
 	log.Infof("Fortio terminal event dump started. ^C 3 times to exit (or pkill tev). Ctrl-L clears the screen.")

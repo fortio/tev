@@ -31,6 +31,8 @@ tev help
 ```
 
 ```sh
+  -code string
+         Additional code to send (will be unquoted, eg "\033[..." will send CSI code)
   -echo
          Echo input to stdout instead of logging escaped bytes, also turns off mouse tracking
   -mouse-clicks
