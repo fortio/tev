@@ -123,6 +123,26 @@ func Main() int {
 	return DebugLoop(ap, echoMode)
 }
 
+func ProcessMouse(ap *ansipixels.AnsiPixels, leftOver []byte) ([]byte, ansipixels.MouseStatus) {
+	ap.Data = append(leftOver, ap.Data...) // prepend any left over from previous read
+	leftOver = leftOver[:0]                // reset left over
+	for {
+		dec := ap.MouseDecode()
+		switch dec {
+		case ansipixels.MousePrefix:
+			// doesn't seem to ever happen again with 1006h, did with short form on windows terminal.
+			log.Infof("Partial/split mouse event, reading more...")
+			leftOver = append(leftOver, ap.Data...)
+			continue // wait for more data
+		case ansipixels.MouseComplete:
+			log.Infof("\tMouse event detected: buttons/modifiers %06b %s x %d, y %d", ap.Mbuttons, ap.MouseDebugString(), ap.Mx, ap.My)
+		default:
+			// no mouse or error already logged.
+			return leftOver, dec
+		}
+	}
+}
+
 func DebugLoop(ap *ansipixels.AnsiPixels, echoMode bool) int {
 	logLevel := log.Info
 	if echoMode {
@@ -143,20 +163,12 @@ func DebugLoop(ap *ansipixels.AnsiPixels, echoMode bool) int {
 		if echoMode {
 			os.Stdout.Write(ap.Data)
 		} else {
-			ap.Data = append(leftOver, ap.Data...) // prepend any left over from previous read
-			leftOver = leftOver[:0]                // reset left over
-			dec := ap.MouseDecode(false)
-			switch dec {
-			case ansipixels.MousePrefix:
-				log.LogVf("Partial/split mouse event, reading more...")
-				leftOver = append(leftOver, ap.Data...)
-				continue // wait for more data
-			case ansipixels.MouseComplete:
-				log.Infof("Mouse event detected: buttons %06b, x %d, y %d", ap.Mbuttons, ap.Mx, ap.My)
-			case ansipixels.NoMouse, ansipixels.MouseError:
-				// fallthrough (error already logged and no mouse is normal case)
+			var st ansipixels.MouseStatus
+			if leftOver, st = ProcessMouse(ap, leftOver); st == ansipixels.MousePrefix {
+				continue
 			}
 			if len(ap.Data) == 0 {
+				// had nothing but mouse.
 				continue
 			}
 		}
