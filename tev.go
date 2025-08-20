@@ -104,7 +104,8 @@ func Main() int {
 	} else {
 		log.Infof("Bracketed paste mode disabled")
 	}
-	if *codeFlag != "" {
+	switch {
+	case *codeFlag != "":
 		inp := "\"" + *codeFlag + "\""
 		dec, err := strconv.Unquote(inp)
 		if err != nil {
@@ -112,14 +113,13 @@ func Main() int {
 		}
 		log.Infof("Sending code flag %q", dec)
 		ap.WriteString(dec)
+	case !*noRawFlag:
+		log.Infof("Tabs: %v", GetTabStops(ap))
+	default:
+		log.Infof("Sample tabs:\n\t0\t1\t2\t3\t4\t5\t6\t7\t8")
 	}
 	ap.Out.Flush()
 	log.Infof("Fortio terminal event dump started. ^C 3 times to exit (or pkill tev). Ctrl-L clears the screen.")
-	if !*noRawFlag {
-		log.Infof("Tabs: %v", GetTabStops(ap))
-	} else {
-		log.Infof("Sample tabs:\n\t0\t1\t2\t3\t4\t5\t6\t7\t8")
-	}
 	return DebugLoop(ap, echoMode)
 }
 

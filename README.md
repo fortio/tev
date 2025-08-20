@@ -73,3 +73,10 @@ $ tev -no-mouse
 20:41:10.428 [INF] Read 1 bytes: "\x03"
 20:41:10.428 [INF] 3rd Ctrl-C received, exiting now.```
 ```
+
+You can also see the effect of some codes:
+```sh
+$ tev -code '\033]11;?\007'
+17:15:06.997 [INF] Sending code flag "\x1b]11;?\a"
+17:15:06.998 [INF] Read 24 bytes: "\x1b]11;rgb:1e1e/1e1e/1e1e\a"
+```
