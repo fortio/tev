@@ -41,6 +41,8 @@ tev help
          Enable mouse pixel events (vs grid)
   -mouse-x10
          Enable mouse X10 events mode
+  -no-bg-color-query
+         Don't query terminal for background color
   -no-mouse
          Disable mouse tracking events (enabled by default)
   -no-paste-mode
@@ -79,4 +81,11 @@ You can also see the effect of some codes:
 $ tev -code '\033]11;?\007'
 17:15:06.997 [INF] Sending code flag "\x1b]11;?\a"
 17:15:06.998 [INF] Read 24 bytes: "\x1b]11;rgb:1e1e/1e1e/1e1e\a"
+```
+
+Which is now built-in (unless passing `-no-bg-color-query`):
+```
+20:06:38.480 [INF] Querying terminal's background color...
+20:06:38.481 [INF] Read 24 bytes: "\x1b]11;rgb:1d1d/1e1e/1d1d\a"
+20:06:38.481 [INF] OSC background color decoded: #1D1E1D
 ```
