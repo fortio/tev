@@ -58,6 +58,7 @@ func Main() int {
 	noRawFlag := flag.Bool("no-raw", false, "Stay in cooked mode, instead of defaulting to raw mode")
 	echoFlag := flag.Bool("echo", false, "Echo input to stdout instead of logging escaped bytes, also turns off mouse tracking")
 	codeFlag := flag.String("code", "", "Additional code to send (will be unquoted, eg \"\\033[...\" will send CSI code)")
+	noBackgroundFlag := flag.Bool("no-bg-color-query", false, "Don't query terminal for background color")
 	cli.Main()
 	ap := ansipixels.NewAnsiPixels(*fpsFlag) // use the specified fps - if 0, it will be blocking mode.
 	if !*noRawFlag {
@@ -118,6 +119,12 @@ func Main() int {
 	default:
 		log.Infof("Sample tabs:\n\t0\t1\t2\t3\t4\t5\t6\t7\t8")
 	}
+	if !*noBackgroundFlag {
+		log.Infof("Querying terminal's background color...")
+		ap.RequestBackgroundColor()
+	} else {
+		ap.GotBackground = true // pretend we already go it so we don't keep trying.
+	}
 	ap.Out.Flush()
 	log.Infof("Fortio terminal event dump started. ^C 3 times to exit (or pkill tev). Ctrl-L clears the screen.")
 	return DebugLoop(ap, echoMode)
@@ -160,6 +167,12 @@ func DebugLoop(ap *ansipixels.AnsiPixels, echoMode bool) int {
 			continue
 		}
 		log.Logf(logLevel, "Read %d bytes: %q", len(ap.Data), ap.Data)
+		if !ap.GotBackground && ap.OSCDecode() {
+			log.Infof("OSC background color decoded: %s", ap.Background)
+			if len(ap.Data) == 0 {
+				continue
+			}
+		}
 		if echoMode {
 			os.Stdout.Write(ap.Data)
 		} else {
