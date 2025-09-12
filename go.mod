@@ -3,9 +3,9 @@ module fortio.org/tev
 go 1.23.0
 
 require (
-	fortio.org/cli v1.10.0
+	fortio.org/cli v1.11.0
 	fortio.org/log v1.17.2
-	fortio.org/terminal v0.52.0
+	fortio.org/terminal v0.52.2
 )
 
 require (
