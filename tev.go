@@ -61,6 +61,9 @@ func Main() int {
 	noBackgroundFlag := flag.Bool("no-bg-color-query", false, "Don't query terminal for background color")
 	cli.Main()
 	ap := ansipixels.NewAnsiPixels(*fpsFlag) // use the specified fps - if 0, it will be blocking mode.
+	// We do logger setup ourselves below after opening the terminal to not get buffered/needing flushing.
+	ap.AutoLoggerSetup = false
+	extra := " 3 times"
 	if !*noRawFlag {
 		err := ap.Open()
 		if err != nil {
@@ -70,6 +73,7 @@ func Main() int {
 		terminal.LoggerSetup(crlfWriter)
 	} else {
 		log.LogVf("Not enabling raw mode, staying in cooked mode")
+		extra = ""
 		_ = ap.GetSize() // to set ap.H for restore.
 	}
 	// do it even in cooked mode to turn off mouse spam etc...
@@ -119,14 +123,15 @@ func Main() int {
 	default:
 		log.Infof("Sample tabs:\n\t0\t1\t2\t3\t4\t5\t6\t7\t8")
 	}
-	if !*noBackgroundFlag {
+	if !*noBackgroundFlag && !*noRawFlag {
 		log.Infof("Querying terminal's background color...")
 		ap.RequestBackgroundColor()
 	} else {
 		ap.GotBackground = true // pretend we already go it so we don't keep trying.
 	}
 	ap.Out.Flush()
-	log.Infof("Fortio terminal event dump started. ^C 3 times to exit (or pkill tev). Ctrl-L clears the screen.")
+
+	log.Infof("Fortio terminal event dump started. ^C%s to exit (or pkill tev). Ctrl-L clears the screen.", extra)
 	return DebugLoop(ap, echoMode)
 }
 
