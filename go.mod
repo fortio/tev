@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	fortio.org/cli v1.12.2
 	fortio.org/log v1.18.1
-	fortio.org/terminal v0.60.1
+	fortio.org/terminal v0.60.2
 )
 
 require (
