@@ -55,6 +55,7 @@ func Main() int {
 	noPasteModeFlag := flag.Bool("no-paste-mode", false, "Disable bracketed paste mode")
 	fpsFlag := flag.Float64("fps", 0,
 		"Ansi pixels debug/complex mode - fps arg (default is 0, meaning simplest code in ansipixels: blocking mode reads)")
+	fpsticksFlag := flag.Bool("ticks", false, "Ansi pixels debug to use the FPSTicks loop instead of ReadOrResizeOrSignal")
 	noRawFlag := flag.Bool("no-raw", false, "Stay in cooked mode, instead of defaulting to raw mode")
 	echoFlag := flag.Bool("echo", false, "Echo input to stdout instead of logging escaped bytes, also turns off mouse tracking")
 	codeFlag := flag.String("code", "", "Additional code to send (will be unquoted, eg \"\\033[...\" will send CSI code)")
@@ -108,6 +109,10 @@ func Main() int {
 		log.Infof("Bracketed paste mode enabled")
 	} else {
 		log.Infof("Bracketed paste mode disabled")
+	}
+	if *fpsticksFlag {
+		log.Infof("Fortio terminal simplified FPSTicks event dump. ^C times to exit (or pkill tev).")
+		return DebugLoopFPSTicks(ap)
 	}
 	switch {
 	case *codeFlag != "":
@@ -211,4 +216,33 @@ func DebugLoop(ap *ansipixels.AnsiPixels, echoMode bool) int {
 			exitCount = 3 // reset count on any other input
 		}
 	}
+}
+
+// DebugLoopFPSTicks is a simplified loop to check FPSTicks mode.
+func DebugLoopFPSTicks(ap *ansipixels.AnsiPixels) int {
+	exitCount := 3
+	err := ap.FPSTicks(func() bool {
+		l := len(ap.Data)
+		log.LogVf("FPSTicks tick, data len=%d", l)
+		if l == 0 { // not really possible.
+			return true
+		}
+		log.Logf(log.Info, "Read %d bytes: %q", len(ap.Data), ap.Data)
+		switch ap.Data[0] {
+		case 3: // Ctrl-C
+			exitCount--
+			if exitCount == 0 {
+				log.Infof("3rd Ctrl-C received, exiting now.")
+				return false
+			}
+			log.Infof("Ctrl-C received, %d more to exit..", exitCount)
+		default:
+			exitCount = 3 // reset count on any other input
+		}
+		return true
+	})
+	if err != nil {
+		return log.FErrf("Error reading terminal: %v", err)
+	}
+	return 0
 }
