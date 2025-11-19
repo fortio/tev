@@ -65,7 +65,7 @@ func Main() int {
 	// We do logger setup ourselves below after opening the terminal to not get buffered/needing flushing.
 	ap.AutoLoggerSetup = false
 	extra := " 3 times"
-	if !*noRawFlag {
+	if !*noRawFlag || *fpsticksFlag {
 		err := ap.Open()
 		if err != nil {
 			return log.FErrf("Failed to open terminal: %v", err)
@@ -111,7 +111,7 @@ func Main() int {
 		log.Infof("Bracketed paste mode disabled")
 	}
 	if *fpsticksFlag {
-		log.Infof("Fortio terminal simplified FPSTicks event dump. ^C times to exit (or pkill tev).")
+		log.Infof("Fortio terminal simplified FPSTicks event dump. ^C 3 times to exit (or pkill tev).")
 		return DebugLoopFPSTicks(ap)
 	}
 	switch {
