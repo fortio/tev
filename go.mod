@@ -7,7 +7,7 @@ toolchain go1.24.10
 require (
 	fortio.org/cli v1.12.3
 	fortio.org/log v1.18.3
-	fortio.org/terminal v0.61.1-0.20251119020835-8b2822ae305b
+	fortio.org/terminal v0.62.0
 )
 
 require (
