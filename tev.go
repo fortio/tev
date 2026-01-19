@@ -61,6 +61,10 @@ func Main() int {
 	codeFlag := flag.String("code", "", "Additional code to send (will be unquoted, eg \"\\033[...\" will send CSI code)")
 	noBackgroundFlag := flag.Bool("no-bg-color-query", false, "Don't query terminal for background color")
 	cli.Main()
+	if *fpsticksFlag && *fpsFlag == 0 {
+		log.Infof("Ticks mode selected with no fps, defaulting to 30 fps")
+		*fpsFlag = 30 // default to 30 fps for ticks mode.
+	}
 	ap := ansipixels.NewAnsiPixels(*fpsFlag) // use the specified fps - if 0, it will be blocking mode.
 	// We do logger setup ourselves below after opening the terminal to not get buffered/needing flushing.
 	ap.AutoLoggerSetup = false
@@ -221,6 +225,10 @@ func DebugLoop(ap *ansipixels.AnsiPixels, echoMode bool) int {
 // DebugLoopFPSTicks is a simplified loop to check FPSTicks mode.
 func DebugLoopFPSTicks(ap *ansipixels.AnsiPixels) int {
 	exitCount := 3
+	ap.NoDecode = false // let's use default decoding including mouse in this mode.
+	ap.OnMouse = func() {
+		log.Infof("\tMouse event detected: buttons/modifiers %06b %s x %d, y %d", ap.Mbuttons, ap.MouseDebugString(), ap.Mx, ap.My)
+	}
 	err := ap.FPSTicks(func() bool {
 		l := len(ap.Data)
 		log.LogVf("FPSTicks tick, data len=%d", l)
