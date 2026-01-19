@@ -229,6 +229,9 @@ func DebugLoopFPSTicks(ap *ansipixels.AnsiPixels) int {
 	ap.OnMouse = func() {
 		log.Infof("\tMouse event detected: buttons/modifiers %06b %s x %d, y %d", ap.Mbuttons, ap.MouseDebugString(), ap.Mx, ap.My)
 	}
+	ap.AutoSync = false // demo cursor still blinking despite fps mode (though it's not _really_ needing fps mode then)
+	// need 1 manual flush for all the modes to be set.
+	ap.Out.Flush()
 	err := ap.FPSTicks(func() bool {
 		l := len(ap.Data)
 		log.LogVf("FPSTicks tick, data len=%d", l)
