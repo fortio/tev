@@ -22,4 +22,4 @@ clean:
 	curl -fsS -o .golangci.yml https://raw.githubusercontent.com/fortio/workflows/main/golangci.yml
 
 
-.PHONY: lint all clean
+.PHONY: all clean lint test
