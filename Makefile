@@ -1,8 +1,8 @@
-all: clean lint check test-local-image
+all: clean lint test
 
 OS:=$(shell go env GOOS)
 
-test: test-local-image
+test:
 ifeq ($(OS),windows)
 	@echo "Skipping test on windows, issue with -- and testscript"
 else
@@ -22,4 +22,4 @@ clean:
 	curl -fsS -o .golangci.yml https://raw.githubusercontent.com/fortio/workflows/main/golangci.yml
 
 
-.PHONY: lint check all clean
+.PHONY: lint all clean

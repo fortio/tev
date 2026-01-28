@@ -47,7 +47,7 @@ func Restore(ap *ansipixels.AnsiPixels) {
 	ap.Restore()
 }
 
-func Main() int {
+func Main() int { //nolint: funlen // yeah quite some flags and ifs
 	noMouseFlag := flag.Bool("no-mouse", false, "Disable mouse tracking events (enabled by default)")
 	mousePixelsFlag := flag.Bool("mouse-pixels", false, "Enable mouse pixel events (vs grid)")
 	mouseX10Flag := flag.Bool("mouse-x10", false, "Enable mouse X10 events mode")
@@ -60,6 +60,8 @@ func Main() int {
 	echoFlag := flag.Bool("echo", false, "Echo input to stdout instead of logging escaped bytes, also turns off mouse tracking")
 	codeFlag := flag.String("code", "", "Additional code to send (will be unquoted, eg \"\\033[...\" will send CSI code)")
 	noBackgroundFlag := flag.Bool("no-bg-color-query", false, "Don't query terminal for background color")
+	noShiftFlag := flag.Bool("no-shift", false, "Disable shift modifier reporting in mouse events (enabled by default)")
+
 	cli.Main()
 	if *fpsticksFlag && *fpsFlag == 0 {
 		log.Infof("Ticks mode selected with no fps, defaulting to 30 fps")
@@ -96,7 +98,15 @@ func Main() int {
 	}
 	if !echoMode && !*noMouseFlag {
 		ap.MouseTrackingOn()
-		log.Infof("Mouse tracking enabled")
+		shiftStr := ""
+		if !*noShiftFlag {
+			ap.MouseShiftOn()
+			defer ap.MouseShiftOff()
+		} else {
+			shiftStr = "out"
+		}
+		log.Infof("Mouse tracking enabled (with%s shift modifier)", shiftStr)
+		defer ap.MouseTrackingOff()
 	} else {
 		log.Infof("Mouse tracking disabled")
 	}
