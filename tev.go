@@ -93,20 +93,20 @@ func Main() int { //nolint: funlen // yeah quite some flags and ifs
 	echoMode := *echoFlag
 	if *mouseClickFlag {
 		ap.MouseClickOn()
+		defer ap.MouseClickOff()
 		log.Infof("Mouse click events enabled")
 		*noMouseFlag = true // mouse click implies no mouse tracking
 	}
 	if !echoMode && !*noMouseFlag {
 		ap.MouseTrackingOn()
-		shiftStr := ""
+		defer ap.MouseTrackingOff()
+		shiftStr := "out"
 		if !*noShiftFlag {
 			ap.MouseShiftOn()
 			defer ap.MouseShiftOff()
-		} else {
-			shiftStr = "out"
+			shiftStr = ""
 		}
 		log.Infof("Mouse tracking enabled (with%s shift modifier)", shiftStr)
-		defer ap.MouseTrackingOff()
 	} else {
 		log.Infof("Mouse tracking disabled")
 	}
