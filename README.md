@@ -32,30 +32,31 @@ tev help
 
 ```sh
   -code string
-        Additional code to send (will be unquoted, eg "\033[..." will send CSI code)
+         Additional code to send (will be unquoted, eg "\033[..." will send CSI code)
   -echo
-        Echo input to stdout instead of logging escaped bytes, also turns off mouse tracking
+         Echo input to stdout instead of logging escaped bytes, also turns off mouse tracking
   -fps float
-        Ansi pixels debug/complex mode - fps arg (default is 0, meaning simplest code in ansipixels: blocking mode reads)
+         Ansi pixels debug/complex mode - fps arg (default is 0, meaning simplest code in ansipixels: blocking mode reads)
   -mouse-clicks
-        Enable mouse click events (instead of movement)
+         Enable mouse click events (instead of movement)
   -mouse-pixels
-        Enable mouse pixel events (vs grid)
+         Enable mouse pixel events (vs grid)
   -mouse-x10
-        Enable mouse X10 events mode
+         Enable mouse X10 events mode
   -no-bg-color-query
-        Don't query terminal for background color
+         Don't query terminal for background color
   -no-mouse
-        Disable mouse tracking events (enabled by default)
+         Disable mouse tracking events (enabled by default)
   -no-paste-mode
-        Disable bracketed paste mode
+         Disable bracketed paste mode
   -no-raw
-        Stay in cooked mode, instead of defaulting to raw mode
+         Stay in cooked mode, instead of defaulting to raw mode
+  -no-shift
+         Disable shift modifier reporting in mouse events (enabled by default)
   -quiet
-        Quiet mode, sets loglevel to Error (quietly) to reduces the output
+         Quiet mode, sets loglevel to Error (quietly) to reduces the output
   -ticks
-        Ansi pixels debug to use the FPSTicks loop instead of ReadOrResizeOrSignal,
-        requires non 0 -fps too
+         Ansi pixels debug to use the FPSTicks loop instead of ReadOrResizeOrSignal
 ```
 
 By default it will put the terminal in raw mode, turn on mouse tracking and show exactly what the terminal emulator is sending and in how many batches (of up to 1024 which is the internal ansipixels buffer size). Various flag allow to change what the terminal does (raw, mouse, bracketed paste, etc..)
