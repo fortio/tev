@@ -83,7 +83,7 @@ func Main() int { //nolint: funlen // yeah quite some flags and ifs
 		extra = ""
 		_ = ap.GetSize() // to set ap.H for restore.
 	}
-	// do it even in cooked mode to turn off mouse spam etc...
+	// do it even in cooked mode to turn off potential mouse click spam etc...
 	defer Restore(ap)
 	ap.OnResize = func() error {
 		log.Infof("Terminal resized to %dx%d", ap.W, ap.H)
@@ -97,7 +97,7 @@ func Main() int { //nolint: funlen // yeah quite some flags and ifs
 		log.Infof("Mouse click events enabled")
 		*noMouseFlag = true // mouse click implies no mouse tracking
 	}
-	if !echoMode && !*noMouseFlag {
+	if !echoMode && !*noMouseFlag && !*noRawFlag {
 		ap.MouseTrackingOn()
 		defer ap.MouseTrackingOff()
 		shiftStr := "out"
